@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Board</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Job Board</h1>
+
+        <section id="job-application">
+            <h2>Submit Job Application</h2>
+            <form id="application-form">
+                <label for="user_id">User ID:</label>
+                <input type="text" id="user_id" name="user_id" required>
+
+                <label for="job_id">Job ID:</label>
+                <input type="text" id="job_id" name="job_id" required>
+
+                <label for="resume">Resume (PDF/DOC/DOCX):</label>
+                <input type="file" id="resume" name="resume" required>
+
+                <label for="cover_letter">Cover Letter (PDF/DOC/DOCX):</label>
+                <input type="file" id="cover_letter" name="cover_letter" required>
+
+                <button type="submit">Submit Application</button>
+            </form>
+            <div id="application-result"></div>
+        </section>
+
+        <section id="check-status">
+            <h2>Check Application Status</h2>
+            <form id="status-form">
+                <label for="status_user_id">User ID:</label>
+                <input type="text" id="status_user_id" name="status_user_id" required>
+
+                <label for="status_job_id">Job ID:</label>
+                <input type="text" id="status_job_id" name="status_job_id" required>
+
+                <button type="submit">Check Status</button>
+            </form>
+            <div id="status-result"></div>
+        </section>
+    </div><br>
+
+    <h2>Create Job</h2>
+    <form id="create-job-form">
+        <label>Title:</label><br>
+        <input type="text" id="title"><br>
+        <label>Description:</label><br>
+        <textarea id="description"></textarea><br>
+        <label>Company Name:</label><br>
+        <input type="text" id="company_name"><br>
+        <label>Location:</label><br>
+        <input type="text" id="location"><br><br>
+        <button type="submit">Create Job</button>
+    </form>
+
+    <h2>Job Listings</h2>
+    <div id="job-list" class="job-list"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
