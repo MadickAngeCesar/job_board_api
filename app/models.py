@@ -8,12 +8,12 @@ class UserModel:
         id = db.Column(db.Integer, primary_key=True)
         username = db.Column(db.String(64), index=True, unique=True)
         email = db.Column(db.String(120), index=True, unique=True)
-        password_hash = db.Column(db.String(128))
-        applications = db.relationship('Application', backref='applicant', lazy=True)
+        password = db.Column(db.String(128))
+        role = db.Column(db.String(128))
 
     @staticmethod
-    def create_user(username, email, password_hash):
-        new_user = UserModel.User(username=username, email=email, password_hash=password_hash)
+    def create_user(username, email, password):
+        new_user = UserModel.User(username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
 

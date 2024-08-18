@@ -8,7 +8,7 @@ bp = Blueprint('api', __name__)
 @bp.route('/users', methods=['POST'])
 def create_user():
     data = request.json
-    UserModel.create_user(data['username'], data['email'], data['password_hash'])
+    UserModel.create_user(data['username'], data['email'], data['password'])
     return jsonify({'status': 'User created'}), 201
 
 @bp.route('/users/<int:user_id>', methods=['GET'])
