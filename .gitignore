@@ -4,4 +4,4 @@ __pycache__/
 instancep/
 uploads/
 job-board-frontend/
-utils/
+app/utils/
