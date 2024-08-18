@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a job board API developed using Flask, SQLite, and Flask-RESTful. It provides endpoints for submitting job applications, tracking application statuses, and managing application data. The API is designed to handle file uploads, validate input, and support basic CRUD operations for job applications.
+This project is a job board API developed using Flask, SQLite, Firebase and Flask-RESTful. It provides endpoints for submitting job applications, tracking application statuses, and managing application data. The API is designed to handle file uploads, validate input, and support basic CRUD operations for job applications.
 
 ## Project Structure
 
@@ -10,16 +10,25 @@ This project is a job board API developed using Flask, SQLite, and Flask-RESTful
 application_service/
 │
 ├── app/
+│   ├── static/
+│   │   ├── app.js
+│   │   └── style.css
+│   ├── templates/
+│   │   └── index.html
+│   ├── utils/
+│   │   └── firebase file.json
 │   ├── __init__.py
 │   ├── models.py
 │   ├── routes.py
-│   ├── utils.py
 │   └── config.py
 │
 ├── venv/
 │
 ├── migrations/
 │
+├── instance/
+│ └── config.py
+|
 ├── tests/
 │   ├── __init__.py
 │   ├── test_routes.py
@@ -27,6 +36,8 @@ application_service/
 │
 ├── .gitignore
 ├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
 ├── run.py
 └── README.md
 ```

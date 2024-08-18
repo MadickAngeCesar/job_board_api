@@ -1,27 +1,38 @@
+# tests/test_routes.py
+
 import pytest
 from app import create_app, db
+from app.models import Job
 
-@pytest.fixture(scope='module')
-def test_client():
+@pytest.fixture
+def app():
     app = create_app()
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+    
     with app.app_context():
         db.create_all()
-        yield app.test_client()
+        yield app
+        db.drop_all()
 
-def test_submit_job_application(test_client):
-    data = {
-        'user_id': 1,
-        'job_id': 1,
-        'resume': (open('test_resume.pdf', 'rb'), 'test_resume.pdf'),
-        'cover_letter': (open('test_cover_letter.pdf', 'rb'), 'test_cover_letter.pdf')
-    }
-    response = test_client.post('/api/job/apply', data=data)
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+def test_create_job(client):
+    response = client.post('/api/job/apply', data={
+        'title': 'Software Engineer',
+        'description': 'Develop and maintain software applications.',
+        'company_name': 'Tech Corp',
+        'location': 'San Francisco',
+        'resume': (open('tests/test_resume.pdf', 'rb'), 'test_resume.pdf'),
+        'cover_letter': (open('tests/test_cover_letter.pdf', 'rb'), 'test_cover_letter.pdf')
+    })
     assert response.status_code == 201
+    assert b'Application submitted successfully' in response.data
 
-def test_get_application_status(test_client):
-    response = test_client.get('/api/application/status?user_id=1&job_id=1')
+def test_get_application_status(client):
+    # Assuming you have a job with ID 1 in your test database
+    response = client.get('/api/application/status', query_string={'application_id': 1})
     assert response.status_code == 200
-    assert response.json['status'] == 'submitted'
+    assert b'Application Status:' in response.data
