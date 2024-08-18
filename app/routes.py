@@ -1,90 +1,135 @@
-from flask import request, jsonify, current_app as app  # Add current_app for app context
-from flask_restful import Resource, Api
-from app.models import db, Application, Job
-from app.utils import save_uploaded_file
-from app.config import Config
+from flask import Blueprint, request, jsonify
+from app.models import UserModel, JobModel, ApplicationModel, db
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
-def setup_routes(app):
-    api = Api(app)
-    api.add_resource(JobListAPI, '/api/jobs')
-    api.add_resource(JobAPI, '/api/jobs/<int:job_id>')
-    api.add_resource(JobApplicationAPI, '/api/job/apply')
-    api.add_resource(ApplicationStatusAPI, '/api/application/status')
+bp = Blueprint('api', __name__)
 
-# Resource Classes
-class JobApplicationAPI(Resource):
-    def post(self):
-        user_id = request.form.get('user_id')
-        job_id = request.form.get('job_id')
-        resume = request.files.get('resume')
-        cover_letter = request.files.get('cover_letter')
+# User Routes
+@bp.route('/users', methods=['POST'])
+def create_user():
+    data = request.json
+    UserModel.create_user(data['username'], data['email'], data['password_hash'])
+    return jsonify({'status': 'User created'}), 201
 
-        if not user_id or not job_id or not resume or not cover_letter:
-            return jsonify({"error": "Missing required parameters"}), 400
+@bp.route('/users/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_user(user_id):
+    current_user = get_jwt_identity()
+    if current_user['id'] != user_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    user = UserModel.get_user(user_id)
+    if user:
+        return jsonify({
+            'username': user.username,
+            'email': user.email
+        })
+    else:
+        return jsonify({'error': 'User not found'}), 404
 
-        filename_resume = save_uploaded_file(resume, app.config['UPLOAD_FOLDER'])
-        filename_cover_letter = save_uploaded_file(cover_letter, app.config['UPLOAD_FOLDER'])
+# Job Routes
+@bp.route('/jobs', methods=['POST'])
+@jwt_required()
+def create_job():
+    data = request.json
+    JobModel.add_job(data['title'], data['description'], data['company_name'], data['location'])
+    return jsonify({'status': 'Job created'}), 201
 
-        if not filename_resume or not filename_cover_letter:
-            return jsonify({"error": "Invalid file type"}), 400
+@bp.route('/jobs', methods=['GET'])
+def list_jobs():
+    jobs = JobModel.get_jobs()
+    return jsonify([job.to_dict() for job in jobs])
 
-        application = Application(
-            user_id=user_id,
-            job_id=job_id,
-            resume=filename_resume,
-            cover_letter=filename_cover_letter
-        )
-
-        db.session.add(application)
-        db.session.commit()
-
-        return jsonify({"message": "Application submitted successfully"}), 201
-
-class ApplicationStatusAPI(Resource):
-    def get(self):
-        user_id = request.args.get('user_id')
-        job_id = request.args.get('job_id')
-
-        application = Application.query.filter_by(user_id=user_id, job_id=job_id).first()
-        if application:
-            return jsonify({"status": application.status}), 200
-        else:
-            return jsonify({"error": "Application not found"}), 404
-
-class JobListAPI(Resource):
-    def get(self):
-        jobs = Job.query.all()
-        return jsonify([job.to_dict() for job in jobs])
-
-    def post(self):
-        data = request.get_json()
-        job = Job(
-            title=data.get('title'),
-            description=data.get('description'),
-            company_name=data.get('company_name'),
-            location=data.get('location')
-        )
-        db.session.add(job)
-        db.session.commit()
-        return jsonify(job.to_dict()), 201
-
-class JobAPI(Resource):
-    def get(self, job_id):
-        job = Job.query.get_or_404(job_id)
+@bp.route('/jobs/<int:job_id>', methods=['GET'])
+def get_job_by_id(job_id):
+    job = JobModel.get_job(job_id)
+    if job:
         return jsonify(job.to_dict())
-
-    def put(self, job_id):
-        job = Job.query.get_or_404(job_id)
-        data = request.get_json()
+    else:
+        return jsonify({'error': 'Job not found'}), 404
+    
+@bp.route('/jobs/<int:job_id>', methods=['PUT'])
+def update_job(job_id):
+    data = request.json
+    job = JobModel.get_job(job_id)
+    if job:
         job.title = data.get('title', job.title)
         job.description = data.get('description', job.description)
         job.company_name = data.get('company_name', job.company_name)
         job.location = data.get('location', job.location)
         db.session.commit()
-        return jsonify(job.to_dict())
-
-    def delete(self, job_id):
-        job = Job.query.get_or_404(job_id)
+        return jsonify({'status': 'Job updated'}), 200
+    else:
+        return jsonify({'error': 'Job not found'}), 404
+    
+@bp.route('/jobs/<int:job_id>', methods=['DELETE'])
+def delete_job(job_id):
+    job = JobModel.get_job(job_id)
+    if job:
         db.session.delete(job)
         db.session.commit()
-        return '', 204
+        return jsonify({'status': 'Job deleted'}), 200
+    else:
+        return jsonify({'error': 'Job not found'}), 404
+    
+@bp.route('/jobs/search', methods=['GET'])
+def search_jobs():
+    query = request.args.get('query', '')
+    jobs = JobModel.Job.query.filter(
+        (JobModel.Job.title.ilike(f'%{query}%')) |
+        (JobModel.Job.description.ilike(f'%{query}%')) |
+        (JobModel.Job.company_name.ilike(f'%{query}%')) |
+        (JobModel.Job.location.ilike(f'%{query}%'))
+    ).all()
+    return jsonify([job.to_dict() for job in jobs])
+
+
+# Application Routes
+@bp.route('/applications', methods=['POST'])
+@jwt_required()
+def submit_application():
+    user_id = request.form['user_id']
+    job_id = request.form['job_id']
+    resume = request.files['resume']
+    cover_letter = request.files['cover_letter']
+    ApplicationModel.submit_application(user_id, job_id, resume, cover_letter)
+    return jsonify({'status': 'Application submitted'}), 201
+
+@bp.route('/applications/<int:application_id>', methods=['GET'])
+@jwt_required()
+def get_application(application_id):
+    application = ApplicationModel.get_application(application_id)
+    if application:
+        return jsonify({
+            'resume': application.resume,
+            'cover_letter': application.cover_letter,
+            'status': application.status,
+            'job_id': application.job_id,
+            'user_id': application.user_id
+        })
+    else:
+        return jsonify({'error': 'Application not found'}), 404
+
+@bp.route('/applications/user/<int:user_id>', methods=['GET'])
+@jwt_required()
+def list_user_applications(user_id):
+    current_user = get_jwt_identity()
+    if current_user['id'] != user_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    applications = ApplicationModel.Application.query.filter_by(user_id=user_id).all()
+    return jsonify([{
+        'resume': app.resume,
+        'cover_letter': app.cover_letter,
+        'status': app.status,
+        'job_id': app.job_id
+    } for app in applications])
+
+# Authentication Routes
+@bp.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    user = UserModel.User.query.filter_by(username=data['username']).first()
+    if user and user.password_hash == data['password_hash']:
+        access_token = create_access_token(identity={'id': user.id, 'username': user.username})
+        return jsonify({'access_token': access_token})
+    else:
+        return jsonify({'error': 'Invalid credentials'}), 401

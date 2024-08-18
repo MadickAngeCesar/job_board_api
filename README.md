@@ -35,7 +35,7 @@ application_service/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/job_board_api.git
+   git clone https://github.com/MadickAngeCesar/job_board_api.git
    cd job_board_api
    ```
 
