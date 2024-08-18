@@ -75,6 +75,26 @@ def get_job(job_id):
     job = Job.query.get_or_404(job_id)
     return jsonify(job.to_dict()), 200
 
+@job_bp.route('/search', methods=['GET'])
+def search_jobs():
+    title = request.args.get('title')
+    if not title:
+        return jsonify({'message': 'Job title is required'}), 400
+
+    jobs = Job.query.filter(Job.title.ilike(f'%{title}%')).all()
+    result = []
+    for job in jobs:
+        result.append({
+            'id': job.id,
+            'title': job.title,
+            'description': job.description,
+            'company_name': job.company_name,
+            'location': job.location,
+            'posted_date': job.posted_date
+        })
+    return jsonify(result), 200
+
+
 # Application submission
 @application_bp.route('/', methods=['POST'])
 def submit_application():

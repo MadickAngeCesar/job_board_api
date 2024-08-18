@@ -63,13 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('search-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const title = document.getElementById('search-title').value;
-        const companyName = document.getElementById('search-company-name').value;
-        const location = document.getElementById('search-location').value;
 
         const response = await fetch('/jobs/search?' + new URLSearchParams({
-            title,
-            company_name: companyName,
-            location
+            title
         }));
         const jobs = await response.json();
         
