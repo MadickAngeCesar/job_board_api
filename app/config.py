@@ -1,18 +1,16 @@
-from app.models import db
-from firebase_admin import credentials, initialize_app
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from flask import Flask
+import os
 
 class Config:
-    # Initialize JWTManager
-    jwt = JWTManager()
-
-    app = Flask(__name__)
-    CORS(app)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # Replace with your database URI
-    db.init_app(app)
-    jwt.init_app(app)
-
-    cred = credentials.Certificate("app/utils/jobboardapi-firebase-adminsdk.json")
-    initialize_app(cred, {'storageBucket': 'jobboardapi.appspot.com'})
+    # General configurations
+    #SECRET_KEY = os.environ.get('SECRET_KEY', 'your_default_secret_key')
+    
+    # Database configurations
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///app.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # Firebase configurations
+    FIREBASE_CREDENTIALS_PATH = 'app/utils/jobboardapi-firebase-adminsdk.json'
+    FIREBASE_BUCKET_NAME = 'jobboardapi.appspot.com'
+    
+    # CORS settings
+    #CORS_HEADERS = 'Content-Type'
