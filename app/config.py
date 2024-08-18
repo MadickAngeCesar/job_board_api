@@ -1,4 +1,3 @@
-import os
 from app.models import db
 from firebase_admin import credentials, initialize_app
 from flask_cors import CORS

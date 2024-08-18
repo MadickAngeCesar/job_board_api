@@ -1,6 +1,6 @@
 from app.routes import bp as api_bp
-from config import Config
-from models import db
+from app.config import Config
+from app.models import db
 
 def create_app():
     
