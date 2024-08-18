@@ -14,5 +14,5 @@ class Config:
     db.init_app(app)
     jwt.init_app(app)
 
-    cred = credentials.Certificate("app/jobboardapi-firebase-adminsdk.json")
+    cred = credentials.Certificate("app/utils/jobboardapi-firebase-adminsdk.json")
     initialize_app(cred, {'storageBucket': 'jobboardapi.appspot.com'})
