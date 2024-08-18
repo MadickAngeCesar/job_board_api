@@ -3,4 +3,5 @@ __pycache__/
 *.pyc
 instancep/
 uploads/
-job-board-frontend
+job-board-frontend/
+utils/
