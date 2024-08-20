@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template
 from app.models import User, Job, Application
-from . import db
+from . import db#, mail
+#from flask_mail import Message
 from firebase_admin import storage
 from datetime import datetime
 
@@ -105,9 +106,9 @@ def submit_application():
 
     # Firebase Storage
     bucket = storage.bucket()
-    resume_blob = bucket.blob(f'resumes/{resume.filename}')
+    resume_blob = bucket.blob(f'resumes/{user_id}/{resume.filename}')
     resume_blob.upload_from_file(resume)
-    cover_letter_blob = bucket.blob(f'cover_letters/{cover_letter.filename}')
+    cover_letter_blob = bucket.blob(f'cover_letters/{user_id}/{cover_letter.filename}')
     cover_letter_blob.upload_from_file(cover_letter)
 
     application = Application(
@@ -118,6 +119,29 @@ def submit_application():
     )
     db.session.add(application)
     db.session.commit()
+
+    # Retrieve employer email (assuming you have this in your job model)
+    #job = Job.query.get(job_id)
+    #employer_email = 'madickangecesar59@gmail.com' #job.employer_email
+
+    # Email Content
+    """msg = Message(
+        subject='Job Application',
+        sender='madick.angecesar@ictuniversity.edu.cm',
+        recipients=[employer_email]
+    )
+    msg.body = f""""""
+    A new job application has been submitted for the position: {job_id}.
+
+    Applicant Details:
+    User ID: {user_id}
+    Job ID: {job_id}
+
+    Resume: {resume_blob.public_url}
+    Cover Letter: {cover_letter_blob.public_url}
+    """
+   # mail.send(msg)
+
     return jsonify(application.to_dict()), 201
 
 # Get all applications for a job

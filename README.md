@@ -27,7 +27,7 @@ application_service/
 ├── migrations/
 │
 ├── instance/
-│ └── config.py
+│ └── app.db
 |
 ├── tests/
 │   ├── __init__.py
@@ -35,7 +35,7 @@ application_service/
 │   └── test_models.py
 │
 ├── .gitignore
-├── requirements.txt
+├── requirements.txt # pip freeze > requirements.txt   
 ├── Dockerfile
 ├── docker-compose.yml
 ├── run.py

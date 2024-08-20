@@ -4,9 +4,13 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from flask_migrate import Migrate
+#from flask_mail import Mail
+#from app.config import MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_USE_TLS, MAIL_USE_SSL
+
 
 db = SQLAlchemy()
 migrate = Migrate()
+#mail = None
 
 def create_app():
     # Create and configure the Flask app
@@ -14,6 +18,9 @@ def create_app():
     
     # Load configuration
     app.config.from_object('app.config.Config')
+
+    #global mail
+    #mail = Mail(app)
     
     # Initialize CORS
     CORS(app)
